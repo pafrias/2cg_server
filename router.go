@@ -7,17 +7,29 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func (s *server) routes() {
+func (s *server) routes() *mux.Router {
 	r := mux.NewRouter()
-	// r.HandleFunc("/api/triggers", s.handleGetTriggers()).Methods("GET")
-	// r.HandleFunc("/api/targets", s.handleGetTargets()).Methods("GET")
-	// r.HandleFunc("/api/components", s.handleGetComponents()).Methods("GET")
-	r.HandleFunc("/api/tc/ut", s.getUpgradeTypes()).Methods("GET")
-	r.HandleFunc("/api/tc/components", s.postComponent()).Methods("POST")
-	r.HandleFunc("/api/tc/components", s.getComponent()).Methods("GET")
+	s.trapCompendiumAPI(r.PathPrefix("/api/tc").Subrouter())
+	//s.epicSpellAPI(r.PathPrefix("/api/epic/spells").Subrouter())
 	r.PathPrefix("/").HandlerFunc(s.serveStaticFiles()).Methods("GET")
 	r.Use(logReq)
-	s.router = r
+	return r
+}
+
+func (s *server) trapCompendiumAPI(r *mux.Router) {
+	r.HandleFunc("/components", s.getComponents()).Methods("GET")
+	r.HandleFunc("/upgrades", s.postUpgrade()).Methods("POST")
+	// PATCH
+	r.HandleFunc("/components", s.postComponent()).Methods("POST")
+	// PATCH
+}
+
+func (s *server) epicSpellAPI(r *mux.Router) {
+	// r.HandleFunc("/", s.getELSpells()).Methods("GET")
+	// r.HandleFunc("/{spell_id}", s.getELSpells()).Methods("GET")
+	// POST
+	// PATCH
+	// DELETE
 }
 
 func logReq(next http.Handler) http.Handler {

@@ -1,7 +1,7 @@
 package main
 
 import (
-	"database/sql"
+	"app/model"
 	"fmt"
 	"log"
 
@@ -9,7 +9,7 @@ import (
 )
 
 type server struct {
-	db     *sql.DB
+	db     *model.Connection
 	router *mux.Router
 	// auth something figured out later
 }

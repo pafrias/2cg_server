@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+</head>
+<body>
+  <p>Input new trap component</p>
+  <form action="/api/tc/components" method="POST">
+    <label for="form_type">Type</label>
+    <select required id="form_type">
+      <option value="1">Trigger</option>
+      <option value="2">Target</option> 
+      <option value="3">Effect</option>
+    </select>
+    <label for="form_name">Name</label>
+    <input type="text" name="Name" id="form_name">
+    <label for="form_description">Description</label>
+    <input type="text" name="Description" id="form_description">
+    <label for="form_cost">Cost</label>
+    <input type="number" name="Cost" id="form_cost">
+    <input type="submit" value="submit">
+  </form>
+</body>
+</html>
