@@ -3,16 +3,18 @@ package main
 import (
 	"app/model"
 	"context"
+	"database/sql"
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strconv"
 	"time"
 )
 
 func (s *server) postComponent() http.HandlerFunc {
 	return func(res http.ResponseWriter, req *http.Request) {
 
-		values := parseComponentValues(req)
+		values, err := parseComponentValues(req)
 
 		result, err := s.db.PostComponent(values)
 
@@ -51,18 +53,6 @@ func (s *server) postUpgrade() http.HandlerFunc {
 
 func (s *server) getComponents() http.HandlerFunc {
 
-	type component struct {
-		ID     int    `json:"_id,omitempty"`
-		Name   string `json:"name"`
-		Type   string `json:"type"`
-		Text   string `json:"text"`
-		Cost   int    `json:"cost,omitempty"`
-		Param1 string `json:"param1,omitempty"`
-		Param2 string `json:"param2,omitempty"`
-		Param3 string `json:"param3,omitempty"`
-		Param4 string `json:"param4,omitempty"`
-	}
-
 	return func(res http.ResponseWriter, req *http.Request) {
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()
@@ -78,10 +68,13 @@ func (s *server) getComponents() http.HandlerFunc {
 
 		for rows.Next() {
 			var c model.Component
-			rows.Scan(&c)
+			err = rows.Scan(&c.ID, &c.Name, &c.Type, &c.Text, &c.Cost, &c.P1, &c.P2, &c.P3, &c.P4)
+			if err != nil {
+				println(err.Error())
+			}
 			components = append(components, c)
-			// fmt.Printf("%+v\n", c)
 		}
+
 		data, _ := json.Marshal(components)
 
 		res.Write(data)
@@ -97,11 +90,23 @@ func (s *server) serveStaticFiles() http.HandlerFunc {
 	}
 }
 
-func parseComponentValues(req *http.Request) (results []interface{}) {
+func parseComponentValues(req *http.Request) ([]interface{}, error) {
+	var results []interface{}
 	req.ParseForm()
 	form := req.Form
-	results = append(results, form.Get("name"), form.Get("type"), form.Get("text"), form.Get("cost"), form.Get("p1"), form.Get("p2"), form.Get("p3"), form.Get("p4"))
-	return
+	var cost sql.NullInt64
+
+	if form.Get("cost") != "" {
+		x, err := strconv.ParseInt(form.Get("cost"), 10, 64)
+		if err != nil {
+			return results, err
+		}
+		cost.Int64 = x
+		cost.Valid = true
+	}
+
+	results = append(results, form.Get("name"), form.Get("type"), form.Get("text"), cost, form.Get("param1"), form.Get("param2"), form.Get("param3"), form.Get("param4"))
+	return results, nil
 }
 
 func parseUpgradeValues(req *http.Request) (results []interface{}) {

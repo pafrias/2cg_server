@@ -1,29 +1,62 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <title>Document</title>
+  <style>
+    #param_field {
+      visibility: collapse;
+    }
+
+    thead {
+      text-align: center;
+    }
+
+    #submit_button {
+      font-size: 3rem;
+      padding: 5px;
+      margin: 10px;
+    }
+  </style>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
-  <title>Document</title>
 </head>
 <body>
-
-  <p>Input new trap component</p>
   <form action="/api/tc/components" method="POST" target="form_response">
-    <label for="form_type">Type</label>
-    <select required id="form_type" name="type">
-      <option value=1>Trigger</option>
-      <option value=2>Target</option> 
-      <option value=3>Effect</option>
-    </select>
-    <label for="form_name">Name</label>
-    <input required type="text" name="name" id="form_name">
-    <label for="form_description">description</label>
-    <input required type="text" name="text" id="form_description">
-    <label for="form_cost">Cost</label>
-    <input required type="number" name="cost" id="form_cost">
-    <input type="submit" value="submit">
+    <fieldset>
+      <legend>Input new trap component</legend>
+      <label for="type">Type: </label>
+      <select required id="type" name="type">
+        <option value=1>Trigger</option>
+        <option value=2>Target</option> 
+        <option value=3>Effect</option>
+      </select>
+      <input required type="text" name="name" id="name" placeholder="Component Name">
+      <input required type="number" name="cost" id="cost" placeholder="Cost">
+      <textarea name="text" id="text" cols="100" rows="8" placeholder="Trap Description"></textarea>
+    </fieldset>
+    <fieldset id="param_field">
+      <legend>Tier Values</legend>
+      <table>
+        <thead>
+          <tr>
+            <td>Label</td>
+            <td>Tier 1</td>
+            <td>Tier 2</td>
+            <td>Tier 3</td>
+            <td>Tier 4</td>
+            <td>Tier 5</td>
+            <td>Tier 6</td>
+            <td>Tier 7</td>
+          </tr>
+        </thead>
+        <tbody id="param_table">
+        </tbody>
+      </table>
+    </fieldset>
+    <input type="submit" value="submit" id="submit_button">
   </form>
-  <iframe name="form_response"></iframe>
+  <iframe name="form_response" height="100px"></iframe>
+  <script src="./script.js"></script>
 </body>
 </html>
