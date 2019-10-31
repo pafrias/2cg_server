@@ -1,6 +1,3 @@
-#param_field {
-  visibility: collapse;
-}
 
 thead {
   text-align: center;
@@ -10,8 +7,4 @@ thead {
   font-size: 3rem;
   padding: 5px;
   margin: 10px;
-}
-
-td, td input {
-  width: 10vw;
 }

@@ -1,27 +1,50 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <title>Add Upgrades</title>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
-  <title>Document</title>
+  <link rel="stylesheet" href="./style.css">
+  <script
+  src="https://code.jquery.com/jquery-3.4.1.min.js"
+  integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo="
+  crossorigin="anonymous"></script>
 </head>
 <body>
-  <p>Input new trap component</p>
-  <form action="/api/tc/components" method="POST">
-    <label for="form_type">Type</label>
-    <select required id="form_type">
-      <option value="1">Trigger</option>
-      <option value="2">Target</option> 
-      <option value="3">Effect</option>
-    </select>
-    <label for="form_name">Name</label>
-    <input type="text" name="Name" id="form_name">
-    <label for="form_description">Description</label>
-    <input type="text" name="Description" id="form_description">
-    <label for="form_cost">Cost</label>
-    <input type="number" name="Cost" id="form_cost">
-    <input type="submit" value="submit">
+  <form action="/api/tc/upgrades" method="POST" target="form_response">
+    <fieldset>
+      <legend>Input new trap upgrade</legend>
+      <input required type="text" name="name" id="name" placeholder="Upgrade Name">
+      <input required type="number" name="cost" id="cost" placeholder="Cost">
+      <label for="type">Type: </label>
+      <select required id="type" name="type">
+        <option value=1>Trigger</option>
+        <option value=2>Target</option>
+        <option value=3>Effect</option>
+        <option selected value=4>Universal</option>
+      </select>
+      <span id="component_id"></span>
+      <br>
+      <label for="max">Maximum Applications: </label>
+      <select required name="max">
+        <option selected>1</option>
+        <option>2</option>
+        <option>3</option>
+        <option>4</option>
+        <option>5</option>
+        <option>6</option>
+        <option>7</option>
+        <option>8</option>
+        <option>9</option>
+        <option value=0>Infinite</option>
+      </select>
+      <br>
+      <textarea name="text" id="text" cols="100" rows="8" placeholder="Upgrade Text"></textarea>
+    </fieldset>
+    <input type="submit" value="submit" id="submit_button">
   </form>
+  <iframe name="form_response" height="100px"></iframe>
+  <script src="./script.js"></script>
 </body>
 </html>

@@ -53,11 +53,14 @@ function populateParamsTable() {
       var paramValue = create('input')
       paramValue.className = `param${i + 1}`;
       paramValue.type = 'text';
+      paramValue.oninput = concatParamValues;
       td.append(paramValue)
       row.append(td);
     }
     table.append(row);
   }
+
+
 }
 
 function clearParamsTable() {
@@ -84,12 +87,3 @@ function removeCostInput() {
 }
 
 document.getElementById("type").oninput = handleTypeChange;
-
-var tabledata = document.getElementsByTagName("td")
-
-for (let i = 0; i < tabledata.length; i ++) {
-  var child = tabledata[i].firstElementChild;
-  if (child !== null) {
-    child.oninput = concatParamValues;
-  }
-}
