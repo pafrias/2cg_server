@@ -18,9 +18,11 @@ func (s *server) routes() *mux.Router {
 
 func (s *server) trapCompendiumAPI(r *mux.Router) {
 	r.HandleFunc("/components", s.getComponents()).Methods("GET")
-	r.HandleFunc("/upgrades", s.postUpgrade()).Methods("POST")
-	// PATCH
 	r.HandleFunc("/components", s.postComponent()).Methods("POST")
+	// PATCH
+	r.HandleFunc("/components/{type}", s.getComponents()).Methods("GET")
+	r.HandleFunc("/upgrades", s.postUpgrade()).Methods("POST")
+	r.HandleFunc("/upgrades", s.getUpgrades()).Methods("GET")
 	// PATCH
 }
 

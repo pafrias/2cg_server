@@ -9,12 +9,15 @@ import (
 	"net/http"
 	"strconv"
 	"time"
+
+	"github.com/gorilla/mux"
 )
 
 func (s *server) postComponent() http.HandlerFunc {
 	return func(res http.ResponseWriter, req *http.Request) {
 
 		values, err := parseComponentValues(req)
+		// handle parsing error
 
 		result, err := s.db.PostComponent(values)
 
@@ -34,7 +37,8 @@ func (s *server) postComponent() http.HandlerFunc {
 func (s *server) postUpgrade() http.HandlerFunc {
 	return func(res http.ResponseWriter, req *http.Request) {
 
-		values := parseUpgradeValues(req)
+		values, err := parseUpgradeValues(req)
+		// handle parsing error
 
 		result, err := s.db.PostUpgrade(values)
 
@@ -54,30 +58,74 @@ func (s *server) postUpgrade() http.HandlerFunc {
 func (s *server) getComponents() http.HandlerFunc {
 
 	return func(res http.ResponseWriter, req *http.Request) {
+
+		reqType := mux.Vars(req)["type"]
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()
 
-		rows, err := s.db.GetComponents(ctx)
-		defer rows.Close()
+		rows, err := s.db.GetComponents(ctx, reqType)
 		if err != nil {
 			s.testQueryError(err, "something")
 			return
 		}
+		defer rows.Close()
 
-		var components []model.Component
+		var components []interface{}
 
 		for rows.Next() {
-			var c model.Component
-			err = rows.Scan(&c.ID, &c.Name, &c.Type, &c.Text, &c.Cost, &c.P1, &c.P2, &c.P3, &c.P4)
-			if err != nil {
-				println(err.Error())
+			if reqType == "short" {
+				var c model.ShortComponent
+				err = rows.Scan(&c.ID, &c.Name, &c.Type)
+				if err != nil {
+					println(err.Error())
+				}
+				components = append(components, c)
+			} else {
+				var c model.Component
+				err = rows.Scan(&c.ID, &c.Name, &c.Type, &c.Text, &c.Cost, &c.P1, &c.P2, &c.P3, &c.P4)
+				if err != nil {
+					println(err.Error())
+				}
+				components = append(components, c)
 			}
-			components = append(components, c)
 		}
 
 		data, _ := json.Marshal(components)
 
+		res.WriteHeader(200)
 		res.Write(data)
+	}
+}
+
+func (s *server) getUpgrades() http.HandlerFunc {
+
+	return func(res http.ResponseWriter, req *http.Request) {
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+
+		rows, err := s.db.GetUpgrades(ctx)
+		if err != nil {
+			s.testQueryError(err, "something")
+			return
+		}
+		defer rows.Close()
+
+		var upgrades []model.Upgrade
+
+		for rows.Next() {
+			var u model.Upgrade
+			err = rows.Scan(&u.ID, &u.Name, &u.Type, &u.Component, &u.Text, &u.Cost, &u.Max)
+			if err != nil {
+				println(err.Error())
+			}
+			upgrades = append(upgrades, u)
+		}
+
+		data, err := json.Marshal(upgrades)
+
+		res.WriteHeader(200)
+		res.Write(data)
+
 	}
 }
 
@@ -90,6 +138,7 @@ func (s *server) serveStaticFiles() http.HandlerFunc {
 	}
 }
 
+// this logic may be better located in the "model" package
 func parseComponentValues(req *http.Request) ([]interface{}, error) {
 	var results []interface{}
 	req.ParseForm()
@@ -109,11 +158,22 @@ func parseComponentValues(req *http.Request) ([]interface{}, error) {
 	return results, nil
 }
 
-func parseUpgradeValues(req *http.Request) (results []interface{}) {
+func parseUpgradeValues(req *http.Request) ([]interface{}, error) {
+	var results []interface{}
 	req.ParseForm()
 	form := req.Form
-	results = append(results, form.Get("name"), form.Get("type"), form.Get("text"), form.Get("cost"), form.Get("component_id"), form.Get("max"))
-	return
+	var componentID sql.NullInt64
+
+	if form.Get("component_id") != "" {
+		x, err := strconv.ParseInt(form.Get("component_id"), 10, 64)
+		if err != nil {
+			return results, err
+		}
+		componentID.Int64 = x
+		componentID.Valid = true
+	}
+	results = append(results, form.Get("name"), form.Get("type"), form.Get("text"), form.Get("cost"), componentID, form.Get("max"))
+	return results, nil
 }
 
 // func scanToComponent(rows *sql.Rows) (results []interface{}) {
