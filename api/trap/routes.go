@@ -1,4 +1,4 @@
-package main
+package trap
 
 import (
 	"app/model"
@@ -13,13 +13,13 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func (s *server) postComponent() http.HandlerFunc {
+func (app *TCApp) postComponent() http.HandlerFunc {
 	return func(res http.ResponseWriter, req *http.Request) {
 
 		values, err := parseComponentValues(req)
 		// handle parsing error
 
-		result, err := s.db.PostComponent(values)
+		result, err := app.db.PostComponent(values)
 
 		if err != nil {
 			fmt.Println(err.Error())
@@ -34,13 +34,13 @@ func (s *server) postComponent() http.HandlerFunc {
 	}
 }
 
-func (s *server) postUpgrade() http.HandlerFunc {
+func (app *TCApp) postUpgrade() http.HandlerFunc {
 	return func(res http.ResponseWriter, req *http.Request) {
 
 		values, err := parseUpgradeValues(req)
 		// handle parsing error
 
-		result, err := s.db.PostUpgrade(values)
+		result, err := app.db.PostUpgrade(values)
 
 		if err != nil {
 			fmt.Println(err.Error())
@@ -55,7 +55,7 @@ func (s *server) postUpgrade() http.HandlerFunc {
 	}
 }
 
-func (s *server) getComponents() http.HandlerFunc {
+func (app *TCApp) getComponents() http.HandlerFunc {
 
 	return func(res http.ResponseWriter, req *http.Request) {
 
@@ -63,9 +63,9 @@ func (s *server) getComponents() http.HandlerFunc {
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()
 
-		rows, err := s.db.GetComponents(ctx, reqType)
+		rows, err := app.db.GetComponents(ctx, reqType)
 		if err != nil {
-			s.testQueryError(err, "something")
+			app.testQueryError(err, "something")
 			return
 		}
 		defer rows.Close()
@@ -97,15 +97,15 @@ func (s *server) getComponents() http.HandlerFunc {
 	}
 }
 
-func (s *server) getUpgrades() http.HandlerFunc {
+func (app *TCApp) getUpgrades() http.HandlerFunc {
 
 	return func(res http.ResponseWriter, req *http.Request) {
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()
 
-		rows, err := s.db.GetUpgrades(ctx)
+		rows, err := app.db.GetUpgrades(ctx)
 		if err != nil {
-			s.testQueryError(err, "something")
+			app.testQueryError(err, "something")
 			return
 		}
 		defer rows.Close()
@@ -126,15 +126,6 @@ func (s *server) getUpgrades() http.HandlerFunc {
 		res.WriteHeader(200)
 		res.Write(data)
 
-	}
-}
-
-func (s *server) serveStaticFiles() http.HandlerFunc {
-	dir := http.Dir("./src/app/web")
-	fs := http.FileServer(dir)
-	return func(res http.ResponseWriter, req *http.Request) {
-		fmt.Println("getting file -> ", req.URL)
-		fs.ServeHTTP(res, req)
 	}
 }
 

@@ -1,4 +1,4 @@
-package model
+package db
 
 import (
 	"database/sql"
@@ -13,9 +13,10 @@ type Connection struct {
 	Client *sql.DB
 }
 
-func CreateConnection() *Connection {
+func Open() *Connection {
 	user := os.Getenv("SQL_USER")
 	password := os.Getenv("SQL_PW")
+	// needs extendability
 	connectionString := fmt.Sprintf("%s:%s@/trap_compendium", user, password)
 
 	conn := new(Connection)
