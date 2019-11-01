@@ -1,22 +1,28 @@
 package main
 
 import (
-	"app/api/trap"
 	"fmt"
 	"net/http"
 
 	"github.com/gorilla/mux"
+	"github.com/pafrias/2cgaming-api/api/trap"
 )
 
 func main() {
 	router := mux.NewRouter()
-	// set up trap compendium database and routes
+
+	// set up api connections and routes
 	trap.SetUp(router.PathPrefix("/api/tc/").Subrouter())
-	r.PathPrefix("/").HandlerFunc(serveStaticFiles()).Methods("GET")
-	r.Use(logRequests)
+
+	// serve static files
+	// needs a fix for SPAs
+	router.PathPrefix("/").HandlerFunc(serveStaticFiles()).Methods("GET")
+
+	// middleware
+	router.Use(logRequests)
 
 	// open to requests
-	http.ListenAndServe(":3001", s.router)
+	http.ListenAndServe(":3001", router)
 
 }
 

@@ -5,14 +5,14 @@ import (
 	"log"
 )
 
-func (s *Server) testFatalError(e error, message string) {
+func testFatalError(e error, message string) {
 	if e != nil {
 		fmt.Println(message)
 		log.Fatal(e.Error())
 	}
 }
 
-func (s *Server) testQueryError(e error, message string) {
+func testQueryError(e error, message string) {
 	if e != nil {
 		fmt.Println(message, e.Error())
 	}

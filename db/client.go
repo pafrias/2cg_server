@@ -16,6 +16,7 @@ type Connection struct {
 func Open() *Connection {
 	user := os.Getenv("SQL_USER")
 	password := os.Getenv("SQL_PW")
+
 	// needs extendability
 	connectionString := fmt.Sprintf("%s:%s@/trap_compendium", user, password)
 

@@ -23,7 +23,8 @@
 ### Starting Server
   For security purposes, the username and password for the database are not stored in the repo but are accessed through environment variables at run time. For example, from the go root directory:
   ```bash
-  go build app
+  go get github.com/pafrias/2cgaming api
+  go build
   SQL_USER="very_serious_name" SQL_PW='verys3curep@ssword' ./app
   ```
   Failure to connect will result in a fatal error. Check your variables
