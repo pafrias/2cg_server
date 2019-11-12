@@ -1,25 +1,25 @@
 package trap
 
 import (
+	"database/sql"
 	"fmt"
 	"net/http"
 
 	"github.com/go-playground/form"
 	"github.com/pafrias/2cgaming-api/db"
-	"github.com/pafrias/2cgaming-api/db/models"
 )
 
-// Handler blah blah blah
-type Handler struct {
-	DB *db.Connection
-	// error handler?
+// Server FMI
+type Server struct {
+	DB *sql.DB
 }
 
-func NewHandler(d *db.Connection) Handler {
-	return Handler{d}
+// NewServer returns a new instance of the trap API server
+func NewServer(db *db.Connection) Server {
+	return Server{db.Client}
 }
 
-func (h *Handler) PrintForm() http.HandlerFunc {
+func (s *Server) PrintForm() http.HandlerFunc {
 
 	decoder := form.NewDecoder()
 
@@ -29,7 +29,7 @@ func (h *Handler) PrintForm() http.HandlerFunc {
 			res.Write([]byte(err.Error()))
 		}
 
-		var upgrade models.Upgrade
+		var upgrade upgrade
 
 		if err := decoder.Decode(upgrade, req.Form); err != nil {
 			res.WriteHeader(http.StatusUnprocessableEntity)

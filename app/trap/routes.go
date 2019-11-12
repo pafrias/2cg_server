@@ -9,18 +9,13 @@ import (
 
 	"github.com/go-playground/form"
 	"github.com/gorilla/mux"
-
-	"github.com/pafrias/2cgaming-api/db/models"
 )
 
-// Extend to handle a request for any number of fields?
-func (h *Handler) GetComponents() http.HandlerFunc {
+var components map[uint16]component
+var upgrades map[uint16]upgrade
 
-	type shortComponent struct {
-		ID   string `json:"_id,omitempty"`
-		Name string `json:"name"`
-		Type string `json:"type"`
-	}
+// Extend to handle a request for any number of fields?
+func (s *Server) GetComponents() http.HandlerFunc {
 
 	return func(res http.ResponseWriter, req *http.Request) {
 
@@ -28,7 +23,7 @@ func (h *Handler) GetComponents() http.HandlerFunc {
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()
 
-		rows, err := h.DB.GetComponents(ctx, reqType)
+		rows, err := s.readComponents(ctx, reqType)
 		if err != nil {
 			// handle error
 			return
@@ -46,7 +41,7 @@ func (h *Handler) GetComponents() http.HandlerFunc {
 				}
 				components = append(components, c)
 			} else {
-				var c models.Component
+				var c component
 				err = rows.Scan(&c.ID, &c.Name, &c.Type, &c.Text, &c.Cost, &c.P1, &c.P2, &c.P3, &c.P4)
 				if err != nil {
 					println(err.Error())
@@ -63,7 +58,7 @@ func (h *Handler) GetComponents() http.HandlerFunc {
 }
 
 // PostComponent does things
-func (h *Handler) PostComponent() http.HandlerFunc {
+func (s *Server) PostComponent() http.HandlerFunc {
 
 	decoder := form.NewDecoder()
 
@@ -73,14 +68,14 @@ func (h *Handler) PostComponent() http.HandlerFunc {
 			res.Write([]byte(err.Error()))
 		}
 
-		var component models.Component
+		var component component
 
 		if err := decoder.Decode(&component, req.Form); err != nil {
 			res.WriteHeader(http.StatusUnprocessableEntity)
 			res.Write([]byte(err.Error()))
 		}
 
-		result, err := h.DB.PostComponent(req.Form)
+		result, err := s.createComponent(req.Form)
 
 		if err != nil {
 			// handle different db errors ?
@@ -95,23 +90,23 @@ func (h *Handler) PostComponent() http.HandlerFunc {
 	}
 }
 
-func (h *Handler) GetUpgrades() http.HandlerFunc {
+func (s *Server) GetUpgrades() http.HandlerFunc {
 
 	return func(res http.ResponseWriter, req *http.Request) {
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()
 
-		rows, err := h.DB.GetUpgrades(ctx)
+		rows, err := s.readUpgrades(ctx)
 		if err != nil {
 			// test error
 			return
 		}
 		defer rows.Close()
 
-		var upgrades []models.Upgrade
+		var upgrades []upgrade
 
 		for rows.Next() {
-			var u models.Upgrade
+			var u upgrade
 			err = rows.Scan(&u.ID, &u.Name, &u.Type, &u.ComponentID, &u.Component, &u.Text, &u.Cost, &u.Max)
 			if err != nil {
 				println(err.Error())
@@ -127,7 +122,7 @@ func (h *Handler) GetUpgrades() http.HandlerFunc {
 	}
 }
 
-func (h *Handler) PostUpgrade() http.HandlerFunc {
+func (s *Server) PostUpgrade() http.HandlerFunc {
 
 	decoder := form.NewDecoder()
 
@@ -138,7 +133,7 @@ func (h *Handler) PostUpgrade() http.HandlerFunc {
 			return
 		}
 
-		var upgrade models.Upgrade
+		var upgrade upgrade
 
 		if err := decoder.Decode(upgrade, req.Form); err != nil {
 			res.WriteHeader(http.StatusUnprocessableEntity)
@@ -146,7 +141,7 @@ func (h *Handler) PostUpgrade() http.HandlerFunc {
 			return
 		}
 
-		result, err := h.DB.PostUpgrade(req.Form)
+		result, err := s.createUpgrade(req.Form)
 
 		if err != nil {
 			fmt.Println(err.Error())

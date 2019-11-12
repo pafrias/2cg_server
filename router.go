@@ -29,16 +29,16 @@ func (s *server) createMainRouter() {
 }
 
 func (s *server) applyTrapCompendiumRoutes(r *mux.Router) {
-	trapAPI := trap.NewHandler(s.db)
-	r.HandleFunc("/test", trapAPI.PrintForm()).Methods("POST")
+	api := trap.NewServer(s.db)
+	r.HandleFunc("/test", api.PrintForm()).Methods("POST")
 
-	r.HandleFunc("/components", trapAPI.GetComponents()).Methods("GET")
-	r.HandleFunc("/components/{type}", trapAPI.GetComponents()).Methods("GET")
-	r.HandleFunc("/components", trapAPI.PostComponent()).Methods("POST")
+	r.HandleFunc("/components", api.GetComponents()).Methods("GET")
+	r.HandleFunc("/components/{type}", api.GetComponents()).Methods("GET")
+	r.HandleFunc("/components", api.PostComponent()).Methods("POST")
 	// PATCH NEEDED
 
-	r.HandleFunc("/upgrades", trapAPI.GetUpgrades()).Methods("GET")
-	r.HandleFunc("/upgrades", trapAPI.PostUpgrade()).Methods("POST")
+	r.HandleFunc("/upgrades", api.GetUpgrades()).Methods("GET")
+	r.HandleFunc("/upgrades", api.PostUpgrade()).Methods("POST")
 	// PATCH NEEDED
 }
 
