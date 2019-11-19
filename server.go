@@ -10,8 +10,8 @@ import (
 )
 
 type server struct {
-	db     *db.Connection
-	router *mux.Router
+	db.Connection
+	*mux.Router
 }
 
 func testFatalError(e error, message string) {

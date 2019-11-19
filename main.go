@@ -3,15 +3,13 @@ package main
 import (
 	"net/http"
 
+	"github.com/gorilla/mux"
 	"github.com/pafrias/2cgaming-api/db"
 )
 
 func main() {
 
-	s := server{}
-	// test database connection
-	s.db = db.Open()
-	// test error
+	s := server{db.Open(), mux.NewRouter()}
 
 	s.createMainRouter()
 
