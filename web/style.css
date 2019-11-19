@@ -59,15 +59,15 @@ header div#intro p {
 }
 
 .jumbotron#epic_spell_codex {
-  background-image: url("/images/Hastur_the_Yellow_King.jpeg");
+  background-image: url("static/images/Hastur_the_Yellow_King.jpeg");
 }
 
 .jumbotron#epic_bestiary {
-  background-image: url("/images/Ionia_Megalith_Final_800x600.jpeg");
+  background-image: url("static/images/Ionia_Megalith_Final_800x600.jpeg");
 }
 
 .jumbotron#trap_compendium {
-  background-image: url("/images/Trap_Compendium_Cover.png");
+  background-image: url("static/images/Trap_Compendium_Cover.png");
   background-position: center;
 }
 
