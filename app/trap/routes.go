@@ -11,19 +11,16 @@ import (
 	"github.com/gorilla/mux"
 )
 
-var components map[uint16]component
-var upgrades map[uint16]upgrade
-
-// Extend to handle a request for any number of fields?
-func (s *Server) GetComponents() http.HandlerFunc {
+/*GetComponents gets components...
+Extend to handle a request for any number of fields?*/
+func (a *App) GetComponents() http.HandlerFunc {
 
 	return func(res http.ResponseWriter, req *http.Request) {
-
 		reqType := mux.Vars(req)["type"]
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()
 
-		rows, err := s.readComponents(ctx, reqType)
+		rows, err := a.readComponents(ctx, reqType)
 		if err != nil {
 			// handle error
 			return
@@ -57,8 +54,9 @@ func (s *Server) GetComponents() http.HandlerFunc {
 	}
 }
 
-// PostComponent does things
-func (s *Server) PostComponent() http.HandlerFunc {
+/*PostComponent posts components.
+Relies upon auth at the server level to protect routes*/
+func (a *App) PostComponent() http.HandlerFunc {
 
 	decoder := form.NewDecoder()
 
@@ -75,7 +73,7 @@ func (s *Server) PostComponent() http.HandlerFunc {
 			res.Write([]byte(err.Error()))
 		}
 
-		result, err := s.createComponent(req.Form)
+		result, err := a.createComponent(req.Form)
 
 		if err != nil {
 			// handle different db errors ?
@@ -90,13 +88,14 @@ func (s *Server) PostComponent() http.HandlerFunc {
 	}
 }
 
-func (s *Server) GetUpgrades() http.HandlerFunc {
+/*GetUpgrades gets all trap compendium upgrades*/
+func (a *App) GetUpgrades() http.HandlerFunc {
 
 	return func(res http.ResponseWriter, req *http.Request) {
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()
 
-		rows, err := s.readUpgrades(ctx)
+		rows, err := a.readUpgrades(ctx)
 		if err != nil {
 			// test error
 			return
@@ -122,7 +121,9 @@ func (s *Server) GetUpgrades() http.HandlerFunc {
 	}
 }
 
-func (s *Server) PostUpgrade() http.HandlerFunc {
+/*PostUpgrade posts upgrades.
+Relies upon auth at the server level to protect routes*/
+func (a *App) PostUpgrade() http.HandlerFunc {
 
 	decoder := form.NewDecoder()
 
@@ -141,7 +142,7 @@ func (s *Server) PostUpgrade() http.HandlerFunc {
 			return
 		}
 
-		result, err := s.createUpgrade(req.Form)
+		result, err := a.createUpgrade(req.Form)
 
 		if err != nil {
 			fmt.Println(err.Error())

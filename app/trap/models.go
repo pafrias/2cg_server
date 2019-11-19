@@ -30,3 +30,8 @@ type shortComponent struct {
 	Name string `json:"name"`
 	Type string `json:"type"`
 }
+
+//used for caching
+type components map[uint16]component
+
+type upgrades map[uint16]upgrade

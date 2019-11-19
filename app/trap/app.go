@@ -1,25 +1,36 @@
 package trap
 
 import (
-	"database/sql"
+	"context"
 	"fmt"
 	"net/http"
+	"time"
+
+	"github.com/pafrias/2cgaming-api/db"
 
 	"github.com/go-playground/form"
-	"github.com/pafrias/2cgaming-api/db"
 )
 
-// Server FMI
-type Server struct {
-	DB *sql.DB
+//App is the
+type App struct {
+	*db.Connection
+	components
+	upgrades
 }
 
-// NewServer returns a new instance of the trap API server
-func NewServer(db *db.Connection) Server {
-	return Server{db.Client}
+// NewHandler returns a new instance of the trap API server
+func NewHandler(db *db.Connection) App {
+	cxt, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+
+	if err := db.PingContext(cxt); err != nil {
+		//handle it
+	}
+	cancel()
+
+	return App{db, components{}, upgrades{}}
 }
 
-func (s *Server) PrintForm() http.HandlerFunc {
+func (a *App) PrintForm() http.HandlerFunc {
 
 	decoder := form.NewDecoder()
 
@@ -49,5 +60,14 @@ func (s *Server) PrintForm() http.HandlerFunc {
 		}
 
 		res.Write([]byte(response))
+	}
+}
+
+func (a *App) Test() http.HandlerFunc {
+
+	return func(res http.ResponseWriter, req *http.Request) {
+		fmt.Println(a.components)
+		fmt.Println(a.upgrades)
+
 	}
 }

@@ -8,8 +8,8 @@ import (
 	"strings"
 )
 
-func (s *Server) createComponent(v url.Values) (sql.Result, error) {
-	if err := s.DB.Ping(); err != nil {
+func (a *App) createComponent(v url.Values) (sql.Result, error) {
+	if err := a.DB.Ping(); err != nil {
 		return nil, err
 	}
 
@@ -24,11 +24,11 @@ func (s *Server) createComponent(v url.Values) (sql.Result, error) {
 
 	query := fmt.Sprintf("insert into tc_component (%v) values (%v)", strings.Join(columns, ","), strings.Join(fields, ","))
 
-	return s.DB.Exec(query, values...)
+	return a.DB.Exec(query, values...)
 }
 
-func (s *Server) createUpgrade(v url.Values) (sql.Result, error) {
-	if err := s.DB.Ping(); err != nil {
+func (a *App) createUpgrade(v url.Values) (sql.Result, error) {
+	if err := a.DB.Ping(); err != nil {
 		return nil, err
 	}
 
@@ -43,11 +43,11 @@ func (s *Server) createUpgrade(v url.Values) (sql.Result, error) {
 
 	query := fmt.Sprintf("insert into tc_upgrade (%v) values (%v)", strings.Join(columns, ","), strings.Join(fields, ","))
 
-	return s.DB.Exec(query, values...)
+	return a.DB.Exec(query, values...)
 }
 
-func (s *Server) readComponents(ctx context.Context, queryType string) (r *sql.Rows, err error) {
-	if err := s.DB.Ping(); err != nil {
+func (a *App) readComponents(ctx context.Context, queryType string) (r *sql.Rows, err error) {
+	if err := a.DB.Ping(); err != nil {
 		return nil, err
 	}
 
@@ -68,12 +68,12 @@ func (s *Server) readComponents(ctx context.Context, queryType string) (r *sql.R
 		`
 	}
 
-	return s.DB.QueryContext(ctx, query)
+	return a.DB.QueryContext(ctx, query)
 
 }
 
-func (s *Server) readUpgrades(ctx context.Context) (r *sql.Rows, err error) {
-	if err := s.DB.Ping(); err != nil {
+func (a *App) readUpgrades(ctx context.Context) (r *sql.Rows, err error) {
+	if err := a.DB.Ping(); err != nil {
 		return nil, err
 	}
 
@@ -82,5 +82,5 @@ func (s *Server) readUpgrades(ctx context.Context) (r *sql.Rows, err error) {
 		left join tc_component c on u.component_id = c.id
 		inner join tc_up_type ut on ut.code = u.type`
 
-	return s.DB.QueryContext(ctx, query)
+	return a.DB.QueryContext(ctx, query)
 }
