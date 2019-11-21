@@ -14,8 +14,8 @@ import (
 //App is the
 type App struct {
 	*db.Connection
-	components
-	upgrades
+	componentStore
+	upgradeStore
 }
 
 // NewHandler returns a new instance of the trap API server
@@ -27,7 +27,24 @@ func NewHandler(db *db.Connection) App {
 	}
 	cancel()
 
-	return App{db, components{}, upgrades{}}
+	return App{
+		db,
+		componentStore{
+			components: map[uint16]component{},
+		},
+		upgradeStore{
+			upgrades: map[uint16]upgrade{},
+		},
+	}
+}
+
+func (a *App) Test500Error(e error, res http.ResponseWriter) bool {
+	if e != nil {
+		res.WriteHeader(http.StatusInternalServerError)
+		res.Write([]byte(e.Error()))
+		return true
+	}
+	return false
 }
 
 func (a *App) PrintForm() http.HandlerFunc {
@@ -60,14 +77,5 @@ func (a *App) PrintForm() http.HandlerFunc {
 		}
 
 		res.Write([]byte(response))
-	}
-}
-
-func (a *App) Test() http.HandlerFunc {
-
-	return func(res http.ResponseWriter, req *http.Request) {
-		fmt.Println(a.components)
-		fmt.Println(a.upgrades)
-
 	}
 }

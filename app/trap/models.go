@@ -1,6 +1,10 @@
 package trap
 
-import "github.com/pafrias/2cgaming-api/db/models"
+import (
+	"sync"
+
+	"github.com/pafrias/2cgaming-api/db/models"
+)
 
 type upgrade struct {
 	ID          int32                 `json:"_id,omitempty" form:"-"`
@@ -32,6 +36,12 @@ type shortComponent struct {
 }
 
 //used for caching
-type components map[uint16]component
+type componentStore struct {
+	sync.RWMutex
+	components map[uint16]component
+}
 
-type upgrades map[uint16]upgrade
+type upgradeStore struct {
+	sync.RWMutex
+	upgrades map[uint16]upgrade
+}
