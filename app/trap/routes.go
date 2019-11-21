@@ -7,11 +7,13 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/pafrias/2cgaming-api/utils"
+
 	"github.com/go-playground/form"
 	"github.com/gorilla/mux"
 )
 
-/*GetComponents gets components...
+/*GetComponents fetches data for trigger, targetting, and effect components
 Extend to handle a request for any number of fields?*/
 func (a *App) GetComponents() http.HandlerFunc {
 
@@ -21,35 +23,24 @@ func (a *App) GetComponents() http.HandlerFunc {
 		defer cancel()
 
 		rows, err := a.readComponents(ctx, reqType)
-		if err != nil {
-			// handle error
+		if a.Test500Error(err, res) {
 			return
 		}
 		defer rows.Close()
 
-		var components []interface{}
+		components, err := utils.ScanRowsToArray(rows)
+		if a.Test500Error(err, res) {
+			return
+		}
+		// map ids ?
 
-		for rows.Next() {
-			if reqType == "short" {
-				var c shortComponent
-				err = rows.Scan(&c.ID, &c.Name, &c.Type)
-				if err != nil {
-					println(err.Error())
-				}
-				components = append(components, c)
-			} else {
-				var c component
-				err = rows.Scan(&c.ID, &c.Name, &c.Type, &c.Text, &c.Cost, &c.P1, &c.P2, &c.P3, &c.P4)
-				if err != nil {
-					println(err.Error())
-				}
-				components = append(components, c)
-			}
+		data, err := json.Marshal(components)
+		if a.Test500Error(err, res) {
+			return
 		}
 
-		data, _ := json.Marshal(components)
-
 		res.Header().Set("Content-Type", "application/json")
+		res.WriteHeader(200)
 		res.Write(data)
 	}
 }
@@ -96,28 +87,24 @@ func (a *App) GetUpgrades() http.HandlerFunc {
 		defer cancel()
 
 		rows, err := a.readUpgrades(ctx)
-		if err != nil {
-			// test error
+		if a.Test500Error(err, res) {
 			return
 		}
 		defer rows.Close()
 
-		var upgrades []upgrade
-
-		for rows.Next() {
-			var u upgrade
-			err = rows.Scan(&u.ID, &u.Name, &u.Type, &u.ComponentID, &u.Component, &u.Text, &u.Cost, &u.Max)
-			if err != nil {
-				println(err.Error())
-			}
-			upgrades = append(upgrades, u)
+		upgrades, err := utils.ScanRowsToArray(rows)
+		if a.Test500Error(err, res) {
+			return
 		}
 
 		data, err := json.Marshal(upgrades)
 
+		if a.Test500Error(err, res) {
+			return
+		}
 		res.Header().Set("Content-Type", "application/json")
+		res.WriteHeader(200)
 		res.Write(data)
-
 	}
 }
 
