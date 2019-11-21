@@ -46,6 +46,9 @@ func (a *App) createUpgrade(v url.Values) (sql.Result, error) {
 	return a.DB.Exec(query, values...)
 }
 
+//expand to allow any number of fields
+//params will require a join
+//type will require a join
 func (a *App) readComponents(ctx context.Context, queryType string) (r *sql.Rows, err error) {
 	if err := a.DB.Ping(); err != nil {
 		return nil, err
@@ -56,6 +59,12 @@ func (a *App) readComponents(ctx context.Context, queryType string) (r *sql.Rows
 	if queryType == "short" {
 		query = `
 			select id, c.name, ct.name as type
+			from tc_component c
+				inner join tc_comp_type ct on ct.code = c.type
+		`
+	} else if queryType == "gen" {
+		query = `
+			select id, cost, param1 as costp, ct.name as type 
 			from tc_component c
 				inner join tc_comp_type ct on ct.code = c.type
 		`
