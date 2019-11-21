@@ -14,6 +14,6 @@ func main() {
 	s.createMainRouter()
 
 	// listen to requests
-	http.ListenAndServe(":3001", s.router)
+	http.ListenAndServe(":3001", s.Router)
 
 }

@@ -31,11 +31,10 @@ func (s *server) createMainRouter() {
 func (s *server) createTrapRouter(r *mux.Router) {
 	api := trap.NewHandler(&s.Connection)
 
-	r.HandleFunc("/test", api.PrintForm()).Methods("POST")
+	r.HandleFunc("/test", api.TestGenerator()).Methods("GET")
 
 	r.HandleFunc("/components", api.GetComponents()).Methods("GET")
-
-	r.HandleFunc("/components/{type}", api.GetComponents()).Methods("GET")
+	r.HandleFunc("/components/{type}", api.GetComponents()).Queries("fields", "").Methods("GET")
 	r.HandleFunc("/components", s.checkAuth(2, api.PostComponent())).Methods("POST")
 	// PATCH NEEDED
 
