@@ -68,7 +68,8 @@ func buildRandomizedTrap(components []map[string]interface{}, ups []map[string]i
 		trap.Triggers = append(trap.Triggers, trigger)
 	}
 
-	// handle tier upgrades for trap effects
+	// handle higher tiers for trap effects
+	// should tier/upgrade be 50/50 chance?
 	upgrades := filterByCompID(ups, chosenIDs)
 	for budget > 0 {
 		upgrades = filterByCost(upgrades, budget)
@@ -113,17 +114,12 @@ func buildRandomizedTrap(components []map[string]interface{}, ups []map[string]i
 				l = len(trap.Effects)
 				arr = trap.Effects
 			}
-			fmt.Println(arr)
 			i = rand.Intn(l)
 
 			dest, _ := arr[i]["upgrades"].([]map[string]interface{})
-			dest = append(dest, upgrade)
-			arr[i]["upgrades"] = dest
-			fmt.Println(arr[i])
+			arr[i]["upgrades"] = append(dest, upgrade)
 		}
 	}
-
-	fmt.Println("remaining budget: ", budget)
 
 	return trap, nil
 
