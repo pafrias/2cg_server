@@ -62,7 +62,7 @@ func (a *App) readComponents(ctx context.Context, queryType string) (r *sql.Rows
 			from tc_component c
 				inner join tc_comp_type ct on ct.code = c.type
 		`
-	} else if queryType == "gen" {
+	} else if queryType == "build" {
 		query = `
 			select id, cost, param1 as costp, ct.name as type 
 			from tc_component c
@@ -81,15 +81,25 @@ func (a *App) readComponents(ctx context.Context, queryType string) (r *sql.Rows
 
 }
 
-func (a *App) readUpgrades(ctx context.Context) (r *sql.Rows, err error) {
+func (a *App) readUpgrades(ctx context.Context, queryType string) (r *sql.Rows, err error) {
 	if err := a.DB.Ping(); err != nil {
 		return nil, err
 	}
-
-	query := `select u.id,u.name,ut.name as type,u.component_id, c.name as component,u.text,u.cost,u.max
-		from tc_upgrade u
-		left join tc_component c on u.component_id = c.id
-		inner join tc_up_type ut on ut.code = u.type`
+	var query string
+	if queryType == "build" {
+		query = `
+			select
+				u.id, ut.name as type, u.component_id, u.cost, u.max
+			from tc_upgrade u
+				inner join tc_up_type ut on ut.code = u.type`
+	} else {
+		query = `
+			select
+			u.id, u.name, ut.name as type, u.component_id, c.name as component, u.text, u.cost, u.max
+			from tc_upgrade u
+				left join tc_component c on u.component_id = c.id
+				inner join tc_up_type ut on ut.code = u.type`
+	}
 
 	return a.DB.QueryContext(ctx, query)
 }

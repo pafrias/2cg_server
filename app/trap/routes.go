@@ -86,7 +86,7 @@ func (a *App) GetUpgrades() http.HandlerFunc {
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()
 
-		rows, err := a.readUpgrades(ctx)
+		rows, err := a.readUpgrades(ctx, "")
 		if a.Test500Error(err, res) {
 			return
 		}
@@ -142,5 +142,49 @@ func (a *App) PostUpgrade() http.HandlerFunc {
 			res.WriteHeader(http.StatusOK)
 			res.Write([]byte(str))
 		}
+	}
+}
+
+//HandleBuildTrap blahl bhlahblahb
+func (a *App) HandleBuildTrap() http.HandlerFunc {
+
+	trapBuilder := createBuilderFunc()
+
+	return func(res http.ResponseWriter, req *http.Request) {
+		ctx := context.TODO()
+		rows, err := a.readComponents(ctx, "build")
+		if a.Test500Error(err, res) {
+			return
+		}
+
+		components, err := utils.ScanRowsToArray(rows)
+		if a.Test500Error(err, res) {
+			return
+		}
+
+		rows, err = a.readUpgrades(ctx, "build")
+		if a.Test500Error(err, res) {
+			return
+		}
+
+		upgrades, err := utils.ScanRowsToArray(rows)
+		if a.Test500Error(err, res) {
+			return
+		}
+
+		trap, err := trapBuilder(components, upgrades, 70)
+		if a.Test500Error(err, res) {
+			return
+		}
+
+		data, err := json.Marshal(trap)
+		if a.Test500Error(err, res) {
+			return
+		}
+
+		res.Header().Set("Content-Type", "application/json")
+		res.WriteHeader(200)
+		res.Write(data)
+		fmt.Println("Trap Complete")
 	}
 }
