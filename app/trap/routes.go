@@ -23,19 +23,19 @@ func (a *App) GetComponents() http.HandlerFunc {
 		defer cancel()
 
 		rows, err := a.readComponents(ctx, reqType)
-		if a.Test500Error(err, res) {
+		if a.HandleInternalServerError(err, res) {
 			return
 		}
 		defer rows.Close()
 
 		components, err := utils.ScanRowsToArray(rows)
-		if a.Test500Error(err, res) {
+		if a.HandleInternalServerError(err, res) {
 			return
 		}
 		// map ids ?
 
 		data, err := json.Marshal(components)
-		if a.Test500Error(err, res) {
+		if a.HandleInternalServerError(err, res) {
 			return
 		}
 
@@ -87,19 +87,19 @@ func (a *App) GetUpgrades() http.HandlerFunc {
 		defer cancel()
 
 		rows, err := a.readUpgrades(ctx, "")
-		if a.Test500Error(err, res) {
+		if a.HandleInternalServerError(err, res) {
 			return
 		}
 		defer rows.Close()
 
 		upgrades, err := utils.ScanRowsToArray(rows)
-		if a.Test500Error(err, res) {
+		if a.HandleInternalServerError(err, res) {
 			return
 		}
 
 		data, err := json.Marshal(upgrades)
 
-		if a.Test500Error(err, res) {
+		if a.HandleInternalServerError(err, res) {
 			return
 		}
 		res.Header().Set("Content-Type", "application/json")
@@ -148,37 +148,35 @@ func (a *App) PostUpgrade() http.HandlerFunc {
 //HandleBuildTrap blahl bhlahblahb
 func (a *App) HandleBuildTrap() http.HandlerFunc {
 
-	trapBuilder := createBuilderFunc()
-
 	return func(res http.ResponseWriter, req *http.Request) {
 		ctx := context.TODO()
 		rows, err := a.readComponents(ctx, "build")
-		if a.Test500Error(err, res) {
+		if a.HandleInternalServerError(err, res) {
 			return
 		}
 
 		components, err := utils.ScanRowsToArray(rows)
-		if a.Test500Error(err, res) {
+		if a.HandleInternalServerError(err, res) {
 			return
 		}
 
 		rows, err = a.readUpgrades(ctx, "build")
-		if a.Test500Error(err, res) {
+		if a.HandleInternalServerError(err, res) {
 			return
 		}
 
 		upgrades, err := utils.ScanRowsToArray(rows)
-		if a.Test500Error(err, res) {
+		if a.HandleInternalServerError(err, res) {
 			return
 		}
 
-		trap, err := trapBuilder(components, upgrades, 70)
-		if a.Test500Error(err, res) {
+		trap, err := buildRandomizedTrap(components, upgrades, 70)
+		if a.HandleInternalServerError(err, res) {
 			return
 		}
 
-		data, err := json.Marshal(trap)
-		if a.Test500Error(err, res) {
+		data, err := json.Marshal(&trap)
+		if a.HandleInternalServerError(err, res) {
 			return
 		}
 

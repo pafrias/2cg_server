@@ -38,7 +38,7 @@ func NewHandler(db *db.Connection) App {
 	}
 }
 
-func (a *App) Test500Error(e error, res http.ResponseWriter) bool {
+func (a *App) HandleInternalServerError(e error, res http.ResponseWriter) bool {
 	if e != nil {
 		res.WriteHeader(http.StatusInternalServerError)
 		res.Write([]byte(e.Error()))

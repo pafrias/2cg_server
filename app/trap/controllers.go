@@ -64,7 +64,7 @@ func (a *App) readComponents(ctx context.Context, queryType string) (r *sql.Rows
 		`
 	} else if queryType == "build" {
 		query = `
-			select id, cost, param1 as costp, ct.name as type 
+			select id, c.name, cost, param1 as costp, ct.name as type 
 			from tc_component c
 				inner join tc_comp_type ct on ct.code = c.type
 		`
@@ -89,7 +89,7 @@ func (a *App) readUpgrades(ctx context.Context, queryType string) (r *sql.Rows, 
 	if queryType == "build" {
 		query = `
 			select
-				u.id, ut.name as type, u.component_id, u.cost, u.max
+				u.id, u.name, ut.name as type, u.component_id, u.cost, u.max
 			from tc_upgrade u
 				inner join tc_up_type ut on ut.code = u.type`
 	} else {
