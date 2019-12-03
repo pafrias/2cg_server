@@ -9,17 +9,26 @@ import (
 	"github.com/pafrias/2cgaming-api/utils"
 )
 
-func calculateComponentCost(val map[string]interface{}) int {
-	var cost int
-	str, ok := val["costp"].(string)
-	if ok {
-		x := strings.Split(str, "\t")[1]
-		y, _ := strconv.ParseInt(x, 0, 0)
-		cost = int(y)
-	} else {
-		cost = val["cost"].(int)
+func costStringToArray(str string) ([]int, error) {
+	result := []int{}
+	arr := strings.Split(str, "\t")
+	for _, val := range arr[1:] {
+		num, _ := strconv.ParseInt(val, 0, 0)
+		n := int(num)
+		result = append(result, n)
 	}
-	return cost
+	return result, nil
+}
+
+func calculateComponentCost(val map[string]interface{}) int {
+	var result int
+	cost, ok := val["cost"].([]int)
+	if ok {
+		result = cost[1]
+	} else {
+		result, _ = val["cost"].(int)
+	}
+	return result
 }
 
 func calculateTierfromBudget(budget int) int {
@@ -113,4 +122,43 @@ func selectComponent(slice []map[string]interface{}, budget int) ([]map[string]i
 	newSlice := append(append([]map[string]interface{}{}, slice[:i]...), slice[i+1:]...)
 
 	return newSlice, component, budget
+}
+
+func purchaseEffectTier(effect map[string]interface{}, budget int) (map[string]interface{}, int) {
+	tier, ok := effect["tier"].(int)
+	if !ok {
+		fmt.Println("effect tier error")
+		return effect, budget
+	} else if tier == 7 {
+		return effect, budget
+	} else if tier > 7 {
+		fmt.Println("tier is greater than 7...")
+		return effect, budget
+	}
+
+	costs, ok := effect["cost"].([]int)
+	if !ok {
+		fmt.Println("effect cost error")
+		return effect, budget
+	}
+
+	currentCost := costs[tier-1]
+	options := []int{}
+	var dif, i int
+
+	for _, val := range costs[tier:] {
+		dif = val - currentCost
+		if dif <= budget {
+			options = append(options, val-currentCost)
+		}
+	}
+
+	if len(options) > 0 {
+		i = rand.Intn(len(options))
+		fmt.Printf("Tier for component(%v) increased from %v to %v\n", effect["name"], tier, tier+1+i)
+		effect["tier"] = tier + 1 + i
+		budget -= options[i]
+	}
+
+	return effect, budget
 }
