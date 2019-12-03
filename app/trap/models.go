@@ -45,3 +45,10 @@ type upgradeStore struct {
 	sync.RWMutex
 	upgrades map[uint16]upgrade
 }
+
+type trapTemplate struct {
+	Upgrades []map[string]interface{} `json:"upgrades,omitempty"`
+	Triggers []map[string]interface{} `json:"triggers,omitempty"`
+	Targets  []map[string]interface{} `json:"targets,omitempty"`
+	Effects  []map[string]interface{} `json:"effects,omitempty"`
+}
