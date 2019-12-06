@@ -34,6 +34,10 @@ func Filter(src, testFunc interface{}) ([]interface{}, error) {
 	return results, nil
 }
 
+/*matchFuncType tests for matching elements in a slice and in a functions input, for use as
+a predicate in slice utility functions.
+
+It also tests if that function returns bool*/
 func matchFuncType(src, test reflect.Type) error {
 	var errorStr string
 

@@ -6,6 +6,9 @@ import (
 	"strconv"
 )
 
+/*ScanRowsToArray handles instances where data requires little manipulation from request to return.
+
+It simplifies route handler logic.*/
 func ScanRowsToArray(rows *sql.Rows) ([]map[string]interface{}, error) {
 	columns, _ := rows.ColumnTypes()
 	length := len(columns)
