@@ -7,7 +7,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/pafrias/2cgaming-api/utils"
+	slice "github.com/pafrias/array-utils"
 )
 
 func scanComponentsToStruct(rows *sql.Rows) ([]component, []component, []component) {
@@ -74,7 +74,7 @@ func costStringToArray(str string) ([]int, error) {
 
 func filterComponents(src []component, testFunc func(val component) bool) []component {
 	var results []component
-	filtered, err := utils.Filter(src, testFunc)
+	filtered, err := slice.Filter(src, testFunc)
 	if err != nil {
 		fmt.Println(err)
 		panic(err)
@@ -100,7 +100,7 @@ func filterByCompID(src []component, target []int) []component {
 		if id == 0 {
 			return true
 		}
-		has, err := utils.SliceHas(target, id)
+		has, err := slice.Has(target, id)
 		if err != nil {
 			return false
 		}

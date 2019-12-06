@@ -1,2 +1,4 @@
 /web/trapcompendium/*
 2cgaming-api
+.vscode/launch.json
+.vscode/tasks.json

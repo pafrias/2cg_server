@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"math/rand"
 
-	"github.com/pafrias/2cgaming-api/utils"
+	slice "github.com/pafrias/array-utils"
 )
 
 func buildRandomizedTrap(componentRows, upgradeRows *sql.Rows, budget int) (trapTemplate, error) {
@@ -77,7 +77,7 @@ func buildRandomizedTrap(componentRows, upgradeRows *sql.Rows, budget int) (trap
 			i = rand.Intn(len(trap.Effects))
 			c, cost = purchaseEffectTier(trap.Effects[i], budget)
 			if cost == 0 {
-				tiersComplete, _ = utils.Every(trap.Effects, func(val component) bool {
+				tiersComplete, _ = slice.Every(trap.Effects, func(val component) bool {
 					eff, _ := val.(effect)
 					return eff.isDone
 				})
@@ -105,7 +105,7 @@ func buildRandomizedTrap(componentRows, upgradeRows *sql.Rows, budget int) (trap
 				focus = trap.Effects[i].getUpgrades()
 			}
 
-			index, _ := utils.Any(focus, func(val upgrade) bool { return val.ID == u.ID })
+			index, _ := slice.Any(focus, func(val upgrade) bool { return val.ID == u.ID })
 			if index != -1 {
 				u, cost = purchaseUpgrade(focus[index], budget, true)
 				focus[index] = u
