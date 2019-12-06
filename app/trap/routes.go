@@ -14,29 +14,28 @@ import (
 	"github.com/gorilla/mux"
 )
 
-/*GetComponents fetches data for trigger, targetting, and effect components
-Extend to handle a request for any number of fields?*/
-func (a *App) GetComponents() http.HandlerFunc {
-
+/*GetComponents fetches data for trigger, targetting, and effect components*/
+func (s *Service) GetComponents() http.HandlerFunc {
+	// Extend to handle a request for any number of fields?
 	return func(res http.ResponseWriter, req *http.Request) {
 		reqType := mux.Vars(req)["type"]
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()
 
-		rows, err := a.readComponents(ctx, reqType)
-		if a.HandleInternalServerError(err, res) {
+		rows, err := s.readComponents(ctx, reqType)
+		if s.HandleInternalServerError(err, res) {
 			return
 		}
 		defer rows.Close()
 
 		components, err := utils.ScanRowsToArray(rows)
-		if a.HandleInternalServerError(err, res) {
+		if s.HandleInternalServerError(err, res) {
 			return
 		}
 		// map ids ?
 
 		data, err := json.Marshal(components)
-		if a.HandleInternalServerError(err, res) {
+		if s.HandleInternalServerError(err, res) {
 			return
 		}
 
@@ -48,7 +47,7 @@ func (a *App) GetComponents() http.HandlerFunc {
 
 /*PostComponent posts components.
 Relies upon auth at the server level to protect routes*/
-func (a *App) PostComponent() http.HandlerFunc {
+func (s *Service) PostComponent() http.HandlerFunc {
 
 	decoder := form.NewDecoder()
 
@@ -65,7 +64,7 @@ func (a *App) PostComponent() http.HandlerFunc {
 			res.Write([]byte(err.Error()))
 		}
 
-		result, err := a.createComponent(req.Form)
+		result, err := s.createComponent(req.Form)
 
 		if err != nil {
 			// handle different db errors ?
@@ -81,26 +80,26 @@ func (a *App) PostComponent() http.HandlerFunc {
 }
 
 /*GetUpgrades gets all trap compendium upgrades*/
-func (a *App) GetUpgrades() http.HandlerFunc {
+func (s *Service) GetUpgrades() http.HandlerFunc {
 
 	return func(res http.ResponseWriter, req *http.Request) {
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()
 
-		rows, err := a.readUpgrades(ctx, "")
-		if a.HandleInternalServerError(err, res) {
+		rows, err := s.readUpgrades(ctx, "")
+		if s.HandleInternalServerError(err, res) {
 			return
 		}
 		defer rows.Close()
 
 		upgrades, err := utils.ScanRowsToArray(rows)
-		if a.HandleInternalServerError(err, res) {
+		if s.HandleInternalServerError(err, res) {
 			return
 		}
 
 		data, err := json.Marshal(upgrades)
 
-		if a.HandleInternalServerError(err, res) {
+		if s.HandleInternalServerError(err, res) {
 			return
 		}
 		res.Header().Set("Content-Type", "application/json")
@@ -111,7 +110,7 @@ func (a *App) GetUpgrades() http.HandlerFunc {
 
 /*PostUpgrade posts upgrades.
 Relies upon auth at the server level to protect routes*/
-func (a *App) PostUpgrade() http.HandlerFunc {
+func (s *Service) PostUpgrade() http.HandlerFunc {
 
 	decoder := form.NewDecoder()
 
@@ -130,7 +129,7 @@ func (a *App) PostUpgrade() http.HandlerFunc {
 			return
 		}
 
-		result, err := a.createUpgrade(req.Form)
+		result, err := s.createUpgrade(req.Form)
 
 		if err != nil {
 			fmt.Println(err.Error())
@@ -147,12 +146,11 @@ func (a *App) PostUpgrade() http.HandlerFunc {
 }
 
 //HandleBuildTrap blahl bhlahblahb
-func (a *App) HandleBuildTrap() http.HandlerFunc {
+func (s *Service) HandleBuildTrap() http.HandlerFunc {
 
 	return func(res http.ResponseWriter, req *http.Request) {
 		budget, err := strconv.ParseInt(mux.Vars(req)["budget"], 0, 0)
-		fmt.Println(budget, budget < 1)
-		if a.HandleInternalServerError(err, res) {
+		if s.HandleInternalServerError(err, res) {
 			return
 		} else if budget < 1 || budget > 200 {
 			res.WriteHeader(400)
@@ -161,29 +159,28 @@ func (a *App) HandleBuildTrap() http.HandlerFunc {
 		}
 
 		ctx := context.TODO()
-		components, err := a.readComponents(ctx, "build")
-		if a.HandleInternalServerError(err, res) {
+		components, err := s.readComponents(ctx, "build")
+		if s.HandleInternalServerError(err, res) {
 			return
 		}
 
-		upgrades, err := a.readUpgrades(ctx, "build")
-		if a.HandleInternalServerError(err, res) {
+		upgrades, err := s.readUpgrades(ctx, "build")
+		if s.HandleInternalServerError(err, res) {
 			return
 		}
 
 		trap, err := buildRandomizedTrap(components, upgrades, int(budget))
-		if a.HandleInternalServerError(err, res) {
+		if s.HandleInternalServerError(err, res) {
 			return
 		}
 
 		data, err := json.Marshal(&trap)
-		if a.HandleInternalServerError(err, res) {
+		if s.HandleInternalServerError(err, res) {
 			return
 		}
 
 		res.Header().Set("Content-Type", "application/json")
 		res.WriteHeader(200)
 		res.Write(data)
-		fmt.Println("Trap Complete")
 	}
 }

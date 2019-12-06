@@ -8,8 +8,8 @@ import (
 	"strings"
 )
 
-func (a *App) createComponent(v url.Values) (sql.Result, error) {
-	if err := a.DB.Ping(); err != nil {
+func (s *Service) createComponent(v url.Values) (sql.Result, error) {
+	if err := s.DB.Ping(); err != nil {
 		return nil, err
 	}
 
@@ -24,11 +24,11 @@ func (a *App) createComponent(v url.Values) (sql.Result, error) {
 
 	query := fmt.Sprintf("insert into tc_component (%v) values (%v)", strings.Join(columns, ","), strings.Join(fields, ","))
 
-	return a.DB.Exec(query, values...)
+	return s.DB.Exec(query, values...)
 }
 
-func (a *App) createUpgrade(v url.Values) (sql.Result, error) {
-	if err := a.DB.Ping(); err != nil {
+func (s *Service) createUpgrade(v url.Values) (sql.Result, error) {
+	if err := s.DB.Ping(); err != nil {
 		return nil, err
 	}
 
@@ -43,14 +43,14 @@ func (a *App) createUpgrade(v url.Values) (sql.Result, error) {
 
 	query := fmt.Sprintf("insert into tc_upgrade (%v) values (%v)", strings.Join(columns, ","), strings.Join(fields, ","))
 
-	return a.DB.Exec(query, values...)
+	return s.DB.Exec(query, values...)
 }
 
 //expand to allow any number of fields
 //params will require a join
 //type will require a join
-func (a *App) readComponents(ctx context.Context, queryType string) (r *sql.Rows, err error) {
-	if err := a.DB.Ping(); err != nil {
+func (s *Service) readComponents(ctx context.Context, queryType string) (r *sql.Rows, err error) {
+	if err := s.DB.Ping(); err != nil {
 		return nil, err
 	}
 
@@ -77,12 +77,12 @@ func (a *App) readComponents(ctx context.Context, queryType string) (r *sql.Rows
 		`
 	}
 
-	return a.DB.QueryContext(ctx, query)
+	return s.DB.QueryContext(ctx, query)
 
 }
 
-func (a *App) readUpgrades(ctx context.Context, queryType string) (r *sql.Rows, err error) {
-	if err := a.DB.Ping(); err != nil {
+func (s *Service) readUpgrades(ctx context.Context, queryType string) (r *sql.Rows, err error) {
+	if err := s.DB.Ping(); err != nil {
 		return nil, err
 	}
 	var query string
@@ -101,5 +101,5 @@ func (a *App) readUpgrades(ctx context.Context, queryType string) (r *sql.Rows, 
 				inner join tc_up_type ut on ut.code = u.type`
 	}
 
-	return a.DB.QueryContext(ctx, query)
+	return s.DB.QueryContext(ctx, query)
 }

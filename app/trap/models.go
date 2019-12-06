@@ -27,23 +27,7 @@ type postComponent struct {
 	P3   models.JsonNullString `json:"param3,omitempty"`
 }
 
-type shortComponent struct {
-	ID   string `json:"_id,omitempty"`
-	Name string `json:"name"`
-	Type string `json:"type"`
-}
-
-//used for caching
-// type componentStore struct {
-// 	sync.RWMutex
-// 	components map[uint16]component
-// }
-
-// type upgradeStore struct {
-// 	sync.RWMutex
-// 	upgrades map[uint16]upgrade
-// }
-
+// used for trap building logic
 type trapTemplate struct {
 	Tier     int
 	Upgrades []upgrade   `json:"upgrades,omitempty"`
@@ -126,3 +110,12 @@ func (u upgrade) getUpgrades() []upgrade {
 func (u upgrade) getComponentID() int {
 	return u.cID
 }
+
+// DEPRECATED
+/*
+type shortComponent struct {
+	ID   string `json:"_id,omitempty"`
+	Name string `json:"name"`
+	Type string `json:"type"`
+}
+*/

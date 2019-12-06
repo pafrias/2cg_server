@@ -2,7 +2,6 @@ package trap
 
 import (
 	"database/sql"
-	"fmt"
 	"math/rand"
 
 	"github.com/pafrias/2cgaming-api/utils"
@@ -71,6 +70,7 @@ func buildRandomizedTrap(componentRows, upgradeRows *sql.Rows, budget int) (trap
 	upgrades = filterByCompID(upgrades, selected)
 	tiersComplete := false
 
+	// consider removing timer, once test scripts are complete
 	for timer := 100; budget > 0 && timer > 0; timer-- {
 		i = rand.Intn(2)
 		if i == 1 && !tiersComplete { // purchase higher tier
@@ -114,7 +114,6 @@ func buildRandomizedTrap(componentRows, upgradeRows *sql.Rows, budget int) (trap
 				focus = append(focus, u)
 			}
 			if cost == 0 {
-				fmt.Printf("Budget = %v\n\t%+v\n", budget, upgrades)
 				continue
 			}
 			budget -= cost
