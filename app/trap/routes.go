@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/pafrias/2cgaming-api/utils"
@@ -149,28 +150,28 @@ func (a *App) PostUpgrade() http.HandlerFunc {
 func (a *App) HandleBuildTrap() http.HandlerFunc {
 
 	return func(res http.ResponseWriter, req *http.Request) {
+		budget, err := strconv.ParseInt(mux.Vars(req)["budget"], 0, 0)
+		fmt.Println(budget, budget < 1)
+		if a.HandleInternalServerError(err, res) {
+			return
+		} else if budget < 1 || budget > 200 {
+			res.WriteHeader(400)
+			res.Write([]byte("Cannot build a trap with a budget of 0"))
+			return
+		}
+
 		ctx := context.TODO()
-		rows, err := a.readComponents(ctx, "build")
+		components, err := a.readComponents(ctx, "build")
 		if a.HandleInternalServerError(err, res) {
 			return
 		}
 
-		components, err := utils.ScanRowsToArray(rows)
+		upgrades, err := a.readUpgrades(ctx, "build")
 		if a.HandleInternalServerError(err, res) {
 			return
 		}
 
-		rows, err = a.readUpgrades(ctx, "build")
-		if a.HandleInternalServerError(err, res) {
-			return
-		}
-
-		upgrades, err := utils.ScanRowsToArray(rows)
-		if a.HandleInternalServerError(err, res) {
-			return
-		}
-
-		trap, err := buildRandomizedTrap(components, upgrades, 70)
+		trap, err := buildRandomizedTrap(components, upgrades, int(budget))
 		if a.HandleInternalServerError(err, res) {
 			return
 		}

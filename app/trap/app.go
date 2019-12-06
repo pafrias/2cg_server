@@ -14,8 +14,8 @@ import (
 //App is the
 type App struct {
 	*db.Connection
-	componentStore
-	upgradeStore
+	// componentStore
+	// upgradeStore
 }
 
 // NewHandler returns a new instance of the trap API server
@@ -29,12 +29,12 @@ func NewHandler(db *db.Connection) App {
 
 	return App{
 		db,
-		componentStore{
-			components: map[uint16]component{},
-		},
-		upgradeStore{
-			upgrades: map[uint16]upgrade{},
-		},
+		// componentStore{
+		// 	components: map[uint16]component{},
+		// },
+		// upgradeStore{
+		// 	upgrades: map[uint16]upgrade{},
+		// },
 	}
 }
 
