@@ -58,7 +58,7 @@ func (a *App) PostComponent() http.HandlerFunc {
 			res.Write([]byte(err.Error()))
 		}
 
-		var component component
+		var component postComponent
 
 		if err := decoder.Decode(&component, req.Form); err != nil {
 			res.WriteHeader(http.StatusUnprocessableEntity)
@@ -122,7 +122,7 @@ func (a *App) PostUpgrade() http.HandlerFunc {
 			return
 		}
 
-		var upgrade upgrade
+		var upgrade postUpgrade
 
 		if err := decoder.Decode(upgrade, req.Form); err != nil {
 			res.WriteHeader(http.StatusUnprocessableEntity)
