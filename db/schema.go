@@ -1,6 +1,6 @@
 package db
 
-const USERSCHEMA = `
+const usersSchema = `
 CREATE TABLE Users (
   id int,
   name varchar(80) UNIQUE PRIMARY KEY,
@@ -20,7 +20,7 @@ INSERT INTO User_Types (code, name) VALUES (1, 'admin'),(2, 'employee'),(3, 'pub
 ALTER TABLE Users ADD FOREIGN KEY (type) REFERENCES User_Types (code);
 `
 
-const TCSCHEMA = `
+const tcSchema = `
 CREATE TABLE TC_Components (
   id int UNIQUE PRIMARY KEY AUTO_INCREMENT,
   name varchar(100) NOT NULL UNIQUE,
