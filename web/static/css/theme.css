@@ -29,6 +29,18 @@
   flex-wrap: wrap;
 }
 
+strong {
+	font-weight: bold;
+}
+
+h1 {
+  font-size: 3.5rem;
+}
+
+h2 {
+  font-size: 2.5rem;
+}
+
 h3 {
   font-size: 1.6rem;
   font-weight: bold;
@@ -45,9 +57,12 @@ h5 {
   font-size: 1.2rem;
 }
 
+p {
+  font-size: 1.5rem
+}
+
 body {
   font-family: Metamorphous;
-  min-width: 950px;
   width: 100%;
   min-height: 100vh;
 }
@@ -58,21 +73,36 @@ a {
 	text-decoration: none;
 }
 
-strong {
-	font-weight: bold;
-}
-
 footer {
   height: 14vh;
-  justify-content: space-around;
   text-align: center;
   background: #f9f9f9;
-  padding: 5vh 0;
+  font-family: Aria;
 }
 
 footer div {
-  margin: auto;
-  font-size: 0.75em;
-  color: #676767;
-  width: 60%;
+  padding: 5vh 10%;
+}
+
+/*Desktop*/
+@media only screen and (orientation: landscape), (min-width: 768px) {
+  h1 {
+    font-size: 3.5rem;
+  }
+  
+  h2 {
+    font-size: 2.5rem;
+  }
+
+  p {
+    font-size: 1.5rem
+  }
+  
+  footer {
+    font-size: 0.75rem;
+  }
+
+  footer div {
+    padding: 5vh 20%;
+  }
 }

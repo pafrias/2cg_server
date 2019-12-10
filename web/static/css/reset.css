@@ -3,11 +3,17 @@
    License: none (public domain)
 */
 
-* {
-	margin: 0;
-	padding: 0;
+body, button, div, section, h1, h2, h3, h4, h5, h6, p, a,
+main, header, footer, ol, ul, li {
+  margin: 0;
+  padding: 0;
 	border: 0;
 	vertical-align: baseline;
-	font-family: inherit;
-	box-sizing: border-box;
+  /* font-family: Lato, Arial, Helvetica, sans-serif; */
+  font-weight: 1;
+  font-size: 1rem;
+  box-sizing: border-box;}
+
+body {
+	font-size: 1rem;
 }
