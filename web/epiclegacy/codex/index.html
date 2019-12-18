@@ -1,0 +1,180 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Epic Spell Codex</title>
+    <script src="https://use.fontawesome.com/fb2ef78698.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/knockout/3.4.2/knockout-min.js"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css" integrity="sha384-PsH8R72JQ3SOdhVi3uxftmaW6Vc51MKb0q5P2rRUpPvrszuE4W1povHYgTpBfshb" crossorigin="anonymous">
+    <link rel="stylesheet" href="/static/css/navbar.css">
+    <link rel="stylesheet" href="./css/epic_legacy_spells_srd.css"
+        xmlns="http://www.w3.org/1999/html">
+</head>
+<body>
+    <header>
+        <div id="open_nav_button" class="col">
+          <div></div>
+          <div></div>
+          <div></div>
+        </div>
+        <div id="nav_wrapper">
+          <nav>
+            <a id="close_nav_button" class="close_nav">&times;</a><a id="logo" class="close_nav" target="_blank" href="https://www.2cgaming.com">
+              <p>2CGaming Store</p>
+            <img src="https://www.2cgaming.com/uploads/4/8/4/3/48430755/2cgaming-logo-underlined.png" alt="2CGaming Logo">
+            </a>
+            <a class="close_nav" href="/">Home</a>
+            <a class="close_nav" target="_blank" href="/">Another Link</a>
+            <a class="close_nav" target="_blank" href="/">Another Link</a>
+          </nav>
+        </div>
+      </header>
+<div class="container container-fluid bg">
+        <div class="page-header mt-2">
+        <h1>Epic Spell Codex</h1>
+    </div>
+    <div id="search-filter-wrapper">
+    <div class="row mt-3">
+        <div class="col">
+            <div class="input-group mt-1">
+                <input id="search-input" type="text" class="form-control border-dark" placeholder="Search by keyword across spell name, description, and tag">
+                <span class="input-group-btn">
+                        <button class="btn btn-success btn-lg" type="button" id="search-btn" data-bind="event: {click: addKeywordParameter}">Search</button>
+                        </span>
+            </div>
+        </div>
+    </div>
+    <div class="row mt-1">
+        <div class="col">
+            <div class="card border-dark">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col">
+                            <h4 class="card-title">Search Filters</h4>
+                        </div>
+                    </div>
+                    <!-- Search Categories -->
+                    <div class="row">
+                        <div class="col">
+                            <div class="btn-group-toggle">
+                                <button type="button"  class="btn btn-primary btn-sm pointer mt-1 mr-1" id="show-class-search-filters-btn" data-filter="class" data-bind="event: {click: filterSelected}">Class</button>
+                                <button type="button"  class="btn btn-primary btn-sm pointer mt-1 mr-1" id="show-tier-search-filters-btn" data-filter="tier" data-bind="click: filterSelected">Tier</button>
+                                <button type="button"  class="btn btn-primary btn-sm pointer mt-1 mr-1" id="show-school-search-filters-btn" data-filter="school" data-bind="click: filterSelected">School</button>
+                                <button type="button"  class="btn btn-primary btn-sm pointer mt-1 mr-1" id="show-range-search-filters-btn" data-filter="range" data-bind="click: filterSelected">Range</button>
+                                <button type="button"  class="btn btn-primary btn-sm pointer mt-1 mr-1" id="show-duration-search-filters-btn" data-filter="duration" data-bind="click: filterSelected">Duration</button>
+                                <button type="button"  class="btn btn-primary btn-sm pointer mt-1 mr-1" id="show-cast-time-search-filters-btn" data-filter="cast" data-bind="click: filterSelected">Cast Time</button>
+                                <button type="button"  class="btn btn-primary btn-sm pointer mt-1 mr-1" id="show-mechanics-search-filters-btn" data-filter="mechanics" data-bind="click: filterSelected">Spell Mechanics</button>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Search Filters -->
+                    <div class="row btn-group-toggle mt-1" data-toggle="buttons" id="search-filter-display-container">
+                        <div class="col" data-bind="template: {name:'search-filters', foreach: filterList}"></div>
+                    </div>
+                    <!-- Selected Parameters -->
+                    <div class="row mt-1">
+                        <div class="col">
+                            <div  data-bind="visible: hasParameters">
+                                <p class="mb-0">Selected search constraints: <em>click an element to remove it</em></p>
+                            </div>
+                            <div data-bind="foreach: selectedParameters">
+                                <button type="button" class="btn btn-outline-success btn-sm selected-param pointer mt-1 mr-1" data-bind="text: value, click: $parent.removeParameter, attr:{'data-value': value, 'data-type': type, id: 'search-param-' + value}"></button>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div><!-- /.row -->
+</div>
+
+
+
+
+<script type="text/html" id="search-filters">
+    <button type="button"  class="btn btn-outline-primary btn-sm btn-filter pointer mt-1 mr-1" data-bind="event: {click: $parent.addParameter, 'activeChanged': $parent.removeActive}, text: value, attr: {id: 'btn-search-filter-' + value}"></button>
+</script>
+    <div id="spell-list-wrapper">
+        <!-- NEW ACCORDION-->
+        <div class="container mt-1">
+            <div class="row bg-dark text-light">
+                <div class="col-sm-4 pointer ml-1" id="accordion-header-name" data-bind="event: {click: sortByName}"><h4>Name <span><i class="fa"></i></span></h4></div>
+                <div class="col-sm-3 pointer ml-1" id="accordion-header-tier" data-bind="event: {click: sortByTier}"><h4>Tier <span><i class="fa"></i></span></h4></div>
+                <div class="col-sm-4 pointer ml-1" id="accordion-header-class" data-bind="event: {click: sortByClass}"><h4>Class <span><i class="fa"></i></span></h4></div>
+                <div class="col-sm-1 pointer ml-1"></div>
+            </div>
+        </div>
+        <div id="accordion" class="container" data-bind="template: {name: 'spell-list-template', foreach: spellList}"></div>
+
+        <div data-bind="visible: noSearchResults ">
+            <div class="container">
+                <div class="row">
+                    <div class="col">
+                        <h3>No results for those constraints</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div data-bind="if: emptyList == true">
+            <div class="container">
+                <div class="row">
+                    <div class="col">
+                        <i class="fa fa-spinner fa-pulse fa-3x fa-fw"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script type="text/html" id="spell-list-template">
+        <div id="accordion-header-' + key + '" class="row collapse-header pointer border border-dark rounded-0 pt-3 pb-3 mt-1" data-toggle="collapse"
+             data-bind="attr: {'data-target': '#spell-record-body-' + spellId, id: 'spell-record-header' + spellId}">
+            <div class="col-sm-4 ascending"><p data-bind="text: spellName"></p></div>
+            <div class="col-sm-3 ascending"><p data-bind="text: spellTier"></p></div>
+            <div class="col-sm-4 ascending"><p data-bind="text: spellClass"></p></div>
+            <div class="col-sm-1"><i class="fa fa-plus float-right"></i></div>
+        </div>
+        <div class=" row accordion-body collapse" data-bind="attr: {id: 'spell-record-body-' + spellId, 'data-header': '#spell-record-header' + spellId}, event: {'hidden.bs.collapse': $parent.onCollapse, 'show.bs.collapse': $parent.onExpand}">
+            <div class="card card-body border border-dark rounded-0 border-top-0">
+                <div class="row">
+                    <div class="col">
+                        <p class="emphasis mt-0 mb-0" >Cast Time: <span data-bind="text: spellCastTime" ></span></p>
+                        <p class="emphasis mt-0 mb-0" >Range:  <span data-bind="text: spellRange" ></span></p>
+                        <p class="emphasis mt-0 mb-0" >School: <span data-bind="text: spellSchool" ></span></p>
+                        <p class="emphasis mt-0 mb-0" >Components: <span data-bind="text: spellComponents" ></span></p>
+                        <p class="emphasis mt-0 mb-0" >Duration: <span data-bind="text: spellDurations" ></span></p>
+                        <p class="emphasis mt-0 mb-0" >Requires Concentration: <span data-bind="text: spellCon" ></span></p>
+                        <p class="mt-1"><span data-bind="html: spellDetails"></span></p>
+                    </div>
+                </div>
+                <div class="card-footer text-muted bg-white" data-bind="visible: spellTags() != ''">
+                    <h6 data-bind="text: spellTags"></h6>
+                </div>
+            </div>
+        </div>
+    </script>
+
+    <br/>
+    <br/>
+</div>
+
+<script
+        src="https://code.jquery.com/jquery-3.2.1.min.js"
+        integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
+        crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.3/umd/popper.min.js" integrity="sha384-vFJXuSJphROIrBnz7yo7oB41mKfc8JzQZiCq4NCceLEaO4IHwicKwpJf9c9IpFgh" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.min.js" integrity="sha384-alpBpkh1PFOepccYVYDB4do5UnbKysX5WZXm3XxPqe5iKTfUKjNkCk9SaVuEZflJ" crossorigin="anonymous"></script>
+
+<script src="https://cdn.ckeditor.com/4.7.3/standard/ckeditor.js"></script>
+
+    <script type="application/javascript" src="./js/build_search_filters.js"></script>
+    <script type="application/javascript" src="./js/epic_legacy_spells_srd.js"></script>
+    <script src="/static/scripts/navbar.js"></script>
+</body>
+
+
+</html>
