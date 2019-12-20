@@ -13,6 +13,7 @@ import (
 //Connection is a wrapper for the database pointer
 type Connection struct {
 	*sql.DB
+	DBName string
 }
 
 /*Open will search the environment for the SQl_USER and SQL_PW variables, using them
@@ -23,8 +24,9 @@ db names*/
 func Open() Connection {
 	user := os.Getenv("SQL_USER")
 	password := os.Getenv("SQL_PW")
+	dbName := "trap_compendium"
 
-	connectionString := fmt.Sprintf("%s:%s@/trap_compendium", user, password)
+	connectionString := fmt.Sprintf("%s:%s@/%s", user, password, dbName)
 
 	db, err := sql.Open("mysql", connectionString)
 
@@ -39,7 +41,7 @@ func Open() Connection {
 	}
 
 	fmt.Println("Connected to database")
-	return Connection{db}
+	return Connection{db, dbName}
 }
 
 //BuildTables executes all table building queries on the current database

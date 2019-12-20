@@ -29,15 +29,18 @@ func (s *server) createMainRouter() {
 }
 
 func (s *server) createTrapRouter(r *mux.Router) {
-	api := trap.NewHandler(&s.Connection)
+	api := trap.OpenService(&s.Connection)
 
 	r.HandleFunc("/build/{budget}", api.HandleBuildTrap()).Methods("GET")
 
+	r.HandleFunc("/components/last", api.GetLastUpdate("tc_component")).Methods("GET")
+	r.HandleFunc("/components/{type}", api.GetComponents()).Methods("GET")
 	r.HandleFunc("/components", api.GetComponents()).Methods("GET")
-	r.HandleFunc("/components/{type}", api.GetComponents()).Queries("fields", "").Methods("GET")
+	// r.HandleFunc("/components/{type}", api.GetComponents()).Queries("fields", "").Methods("GET")
 	r.HandleFunc("/components", s.checkAuth(2, api.PostComponent())).Methods("POST")
 	// PATCH NEEDED
 
+	r.HandleFunc("/upgrades/last", api.GetLastUpdate("tc_upgrade")).Methods("GET")
 	r.HandleFunc("/upgrades", api.GetUpgrades()).Methods("GET")
 	r.HandleFunc("/upgrades", s.checkAuth(2, api.PostUpgrade())).Methods("POST")
 	// PATCH NEEDED

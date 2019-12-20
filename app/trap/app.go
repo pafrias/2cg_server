@@ -1,9 +1,6 @@
 package trap
 
 import (
-	"context"
-	"time"
-
 	"github.com/pafrias/2cgaming-api/db"
 )
 
@@ -13,14 +10,7 @@ type Service struct {
 	*db.Connection
 }
 
-// NewHandler returns a Service exposing the Trap Compendium API
-func NewHandler(db *db.Connection) Service {
-	cxt, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-
-	if err := db.PingContext(cxt); err != nil {
-		//handle it
-	}
-	cancel()
-
+// OpenService returns a Service exposing the Trap Compendium API
+func OpenService(db *db.Connection) Service {
 	return Service{db}
 }

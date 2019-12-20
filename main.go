@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -14,6 +15,8 @@ func main() {
 	s.createMainRouter()
 
 	// listen to requests
-	http.ListenAndServe(":3001", s.Router)
+	err := http.ListenAndServe(":3001", s.Router)
+
+	fmt.Println(err)
 
 }

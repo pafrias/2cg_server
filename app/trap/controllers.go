@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/url"
 	"strings"
+	"time"
 )
 
 func (s *Service) createComponent(v url.Values) (sql.Result, error) {
@@ -23,7 +24,6 @@ func (s *Service) createComponent(v url.Values) (sql.Result, error) {
 	}
 
 	query := fmt.Sprintf("insert into tc_component (%v) values (%v)", strings.Join(columns, ","), strings.Join(fields, ","))
-
 	return s.DB.Exec(query, values...)
 }
 
@@ -102,4 +102,31 @@ func (s *Service) readUpgrades(ctx context.Context, queryType string) (r *sql.Ro
 	}
 
 	return s.DB.QueryContext(ctx, query)
+}
+
+func (s *Service) updateTimestamp(table string) (sql.Result, error) {
+	result, err := s.DB.Exec("UPDATE update_times SET date = ? WHERE table_name = ?", time.Now(), table)
+	fmt.Println(result.LastInsertId())
+	fmt.Println(result.RowsAffected())
+
+	if n, _ := result.RowsAffected(); n == 0 {
+		result, err = s.DB.Exec("INSERT INTO update_times VALUES (?, ?)", table, time.Now())
+	}
+	fmt.Println(result.LastInsertId())
+	fmt.Println(result.RowsAffected())
+
+	return result, err
+}
+
+func (s *Service) readTimestamp(ctx context.Context, table string) (*sql.Row, error) {
+	if err := s.DB.Ping(); err != nil {
+		return nil, err
+	}
+
+	query := fmt.Sprintf(`
+		SELECT date FROM update_times
+		WHERE table_name = '%v';`, table)
+	fmt.Println(query)
+	return s.DB.QueryRowContext(ctx, query), nil
+
 }

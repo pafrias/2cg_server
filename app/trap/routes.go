@@ -14,6 +14,30 @@ import (
 	"github.com/gorilla/mux"
 )
 
+//GetLastUpdate is good.
+func (s *Service) GetLastUpdate(table string) http.HandlerFunc {
+	return func(res http.ResponseWriter, req *http.Request) {
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+
+		row, err := s.readTimestamp(ctx, table)
+		if s.HandleInternalServerError(err, res) {
+			return
+		}
+		//fmt.Printf("%+v\n", row)
+
+		var str string
+		err = row.Scan(&str)
+		if s.HandleInternalServerError(err, res) {
+			return
+		}
+		fmt.Printf("%v\n", str)
+
+		res.WriteHeader(http.StatusOK)
+		res.Write([]byte(str))
+	}
+}
+
 /*GetComponents fetches data for trigger, targetting, and effect components*/
 func (s *Service) GetComponents() http.HandlerFunc {
 	// Extend to handle a request for any number of fields?
@@ -72,7 +96,8 @@ func (s *Service) PostComponent() http.HandlerFunc {
 			res.Write([]byte(err.Error()))
 		} else {
 			num, _ := result.LastInsertId()
-			str := fmt.Sprintf("Success!\nUpdate #%v inserted", num)
+			str := fmt.Sprintf("Success!\nComponent #%v inserted", num)
+			s.updateTimestamp("tc_component")
 			res.WriteHeader(http.StatusOK)
 			res.Write([]byte(str))
 		}
@@ -123,7 +148,7 @@ func (s *Service) PostUpgrade() http.HandlerFunc {
 
 		var upgrade postUpgrade
 
-		if err := decoder.Decode(upgrade, req.Form); err != nil {
+		if err := decoder.Decode(&upgrade, req.Form); err != nil {
 			res.WriteHeader(http.StatusUnprocessableEntity)
 			res.Write([]byte(err.Error()))
 			return
@@ -138,7 +163,8 @@ func (s *Service) PostUpgrade() http.HandlerFunc {
 			res.Write([]byte(err.Error()))
 		} else {
 			num, _ := result.LastInsertId()
-			str := fmt.Sprintf("Success!\nUpdate #%v inserted", num)
+			str := fmt.Sprintf("Success!\nUpgrade #%v inserted", num)
+			s.updateTimestamp("tc_upgrade")
 			res.WriteHeader(http.StatusOK)
 			res.Write([]byte(str))
 		}
