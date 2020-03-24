@@ -29,6 +29,15 @@
   flex-wrap: wrap;
 }
 
+.centered {
+  justify-content: center;
+}
+
+.spread_row >* {
+  width: 100%;
+  margin: auto;
+}
+
 strong {
 	font-weight: bold;
 }
@@ -84,8 +93,15 @@ footer div {
   padding: 5vh 10%;
 }
 
+@media (max-width: 768px) {
+  .spread_row >* {
+    width: 100%;
+    margin: auto;
+  }
+}
+
 /*Desktop*/
-@media only screen and (orientation: landscape), (min-width: 768px) {
+@media (min-width: 768px) {
   h1 {
     font-size: 3.5rem;
   }
@@ -104,5 +120,15 @@ footer div {
 
   footer div {
     padding: 5vh 20%;
+  }
+}
+
+@media only print {
+  header {
+    display: none;
+  }
+
+  footer {
+    display: none;
   }
 }

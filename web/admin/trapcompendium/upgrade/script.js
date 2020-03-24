@@ -28,7 +28,7 @@ function handleTypeInput() {
       for (let i = 0; i < options.length; i++) {
         var menuItem = create('option');
         menuItem.innerText = options[i].name;
-        menuItem.value = options[i]._id;
+        menuItem.value = options[i].id;
         menu.append(menuItem);
       }
     }

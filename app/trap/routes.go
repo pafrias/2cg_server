@@ -4,17 +4,21 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"net/http"
+	"os"
 	"strconv"
 	"time"
 
+	"github.com/pafrias/2cgaming-api/db/models"
 	"github.com/pafrias/2cgaming-api/utils"
 
 	"github.com/go-playground/form"
 	"github.com/gorilla/mux"
 )
 
-//GetLastUpdate is good.
+/*GetLastUpdate takes in a table name and returns a HandlerFunc which replies with a
+timestamp for the last time that table was updated.*/
 func (s *Service) GetLastUpdate(table string) http.HandlerFunc {
 	return func(res http.ResponseWriter, req *http.Request) {
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
@@ -38,9 +42,10 @@ func (s *Service) GetLastUpdate(table string) http.HandlerFunc {
 	}
 }
 
+//Consider extending GetComponents to search the query parameters for the fields to return
+
 /*GetComponents fetches data for trigger, targetting, and effect components*/
 func (s *Service) GetComponents() http.HandlerFunc {
-	// Extend to handle a request for any number of fields?
 	return func(res http.ResponseWriter, req *http.Request) {
 		reqType := mux.Vars(req)["type"]
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
@@ -56,7 +61,6 @@ func (s *Service) GetComponents() http.HandlerFunc {
 		if s.HandleInternalServerError(err, res) {
 			return
 		}
-		// map ids ?
 
 		data, err := json.Marshal(components)
 		if s.HandleInternalServerError(err, res) {
@@ -73,28 +77,34 @@ func (s *Service) GetComponents() http.HandlerFunc {
 Relies upon auth at the server level to protect routes*/
 func (s *Service) PostComponent() http.HandlerFunc {
 
+	type Component struct {
+		Name string                `form:",required"`
+		Type models.JsonNullString `form:",required"`
+		Text string                `form:",required"`
+		Cost models.JsonNullInt32  `form:",omitempty"`
+		P1   models.JsonNullString
+		P2   models.JsonNullString
+		P4   models.JsonNullString
+		P3   models.JsonNullString
+	}
+
 	decoder := form.NewDecoder()
 
 	return func(res http.ResponseWriter, req *http.Request) {
-		if err := req.ParseForm(); err != nil {
-			res.WriteHeader(http.StatusUnprocessableEntity)
-			res.Write([]byte(err.Error()))
+		err := req.ParseForm()
+		if s.HandleUnprocessableEntity(err, res) {
+			return
 		}
 
-		var component postComponent
-
-		if err := decoder.Decode(&component, req.Form); err != nil {
-			res.WriteHeader(http.StatusUnprocessableEntity)
-			res.Write([]byte(err.Error()))
+		var component Component
+		err = decoder.Decode(&component, req.Form)
+		if s.HandleUnprocessableEntity(err, res) {
+			return
 		}
 
 		result, err := s.createComponent(req.Form)
 
-		if err != nil {
-			// handle different db errors ?
-			res.WriteHeader(http.StatusUnprocessableEntity)
-			res.Write([]byte(err.Error()))
-		} else {
+		if !s.HandleUnprocessableEntity(err, res) {
 			num, _ := result.LastInsertId()
 			str := fmt.Sprintf("Success!\nComponent #%v inserted", num)
 			s.updateTimestamp("tc_component")
@@ -104,7 +114,9 @@ func (s *Service) PostComponent() http.HandlerFunc {
 	}
 }
 
-/*GetUpgrades gets all trap compendium upgrades*/
+//Consider extending GetUpgrades to search the query parameters for the fields to return
+
+/*GetUpgrades fetches all trap compendium upgrades*/
 func (s *Service) GetUpgrades() http.HandlerFunc {
 
 	return func(res http.ResponseWriter, req *http.Request) {
@@ -140,28 +152,20 @@ func (s *Service) PostUpgrade() http.HandlerFunc {
 	decoder := form.NewDecoder()
 
 	return func(res http.ResponseWriter, req *http.Request) {
-		if err := req.ParseForm(); err != nil {
-			res.WriteHeader(http.StatusUnprocessableEntity)
-			res.Write([]byte(err.Error()))
+		err := req.ParseForm()
+		if s.HandleUnprocessableEntity(err, res) {
 			return
 		}
 
-		var upgrade postUpgrade
-
-		if err := decoder.Decode(&upgrade, req.Form); err != nil {
-			res.WriteHeader(http.StatusUnprocessableEntity)
-			res.Write([]byte(err.Error()))
+		var upgrade Upgrade
+		err = decoder.Decode(&upgrade, req.Form)
+		if s.HandleUnprocessableEntity(err, res) {
 			return
 		}
 
-		result, err := s.createUpgrade(req.Form)
+		result, err := s.createUpgrade(upgrade)
 
-		if err != nil {
-			fmt.Println(err.Error())
-			// handle db connect error
-			res.WriteHeader(http.StatusUnprocessableEntity)
-			res.Write([]byte(err.Error()))
-		} else {
+		if !s.HandleUnprocessableEntity(err, res) {
 			num, _ := result.LastInsertId()
 			str := fmt.Sprintf("Success!\nUpgrade #%v inserted", num)
 			s.updateTimestamp("tc_upgrade")
@@ -171,7 +175,7 @@ func (s *Service) PostUpgrade() http.HandlerFunc {
 	}
 }
 
-//HandleBuildTrap blahl bhlahblahb
+/*HandleBuildTrap returns a HandlerFunc that generates a random trap with the given cost*/
 func (s *Service) HandleBuildTrap() http.HandlerFunc {
 
 	return func(res http.ResponseWriter, req *http.Request) {
@@ -210,3 +214,64 @@ func (s *Service) HandleBuildTrap() http.HandlerFunc {
 		res.Write(data)
 	}
 }
+
+/* s3 -> database
+
+If this project implements Docker, maybe this function could be used later at runtime
+in order to load the database dynamically, allowing for horizontal scaling*/
+
+/*LoadUpgrades is for bulk loading of upgrade data.
+Use cases include: database failures, horizontal scaling.*/
+func (s *Service) LoadUpgrades() http.HandlerFunc {
+
+	return func(res http.ResponseWriter, req *http.Request) {
+		// change to make a request to a aws bucket
+		// should not rely on locally stored files.
+		jsonFile, err := os.Open("./upgrades.json")
+		if s.HandleInternalServerError(err, res) {
+			fmt.Println(err)
+			return
+		}
+		defer jsonFile.Close()
+
+		data, _ := ioutil.ReadAll(jsonFile)
+
+		upgrades := []Upgrade{}
+
+		err = json.Unmarshal(data, &upgrades)
+
+		if s.HandleInternalServerError(err, res) {
+			fmt.Println(err)
+			return
+		}
+
+		for _, u := range upgrades {
+			_, err = s.createUpgrade(u)
+			if s.HandleUnprocessableEntity(err, res) {
+				return
+			}
+		}
+
+	}
+}
+
+/* Database -> s3
+cacheUpgrades should be on a regular schedule, called every month to create a backup of TC relevant data
+to it's respective s3 bucket
+
+maybe this function shouldn't be a route handler, but simply a function called inside OpenService when
+intializing the microservice.
+
+func (this *Service) cacheUpgrades() http.HandlerFunc{
+
+	return func (res http.ResponseWriter, req *http.Request) {
+		// request all components
+		// Marshall data
+		// store in S3
+
+		// request all upgrades
+		// Marshall data
+		// store in S3
+	}
+}
+*/

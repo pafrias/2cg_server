@@ -7,7 +7,6 @@ import (
 )
 
 //These types have cleaner marshalling behavior for null values
-
 type JsonNullString struct {
 	sql.NullString `json:",omitempty"`
 }
@@ -24,12 +23,25 @@ type JsonNullInt32 struct {
 	sql.NullInt32
 }
 
-func (v JsonNullInt32) MarshalJSON() ([]byte, error) {
+func (v *JsonNullInt32) MarshalJSON() ([]byte, error) {
+	fmt.Println("attempting to marshal int32")
 	if v.Valid {
 		return json.Marshal(v.Int32)
 	} else {
 		return json.Marshal(nil)
 	}
+}
+
+func (v *JsonNullInt32) UnmarshalJSON(data []byte) error {
+	var i int
+	err := json.Unmarshal(data, &i)
+	if err == nil {
+		v.Int32 = int32(i)
+		v.Valid = true
+	} else {
+		v.Valid = false
+	}
+	return err
 }
 
 type JsonNullInt64 struct {

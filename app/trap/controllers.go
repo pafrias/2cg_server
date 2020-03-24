@@ -27,23 +27,22 @@ func (s *Service) createComponent(v url.Values) (sql.Result, error) {
 	return s.DB.Exec(query, values...)
 }
 
-func (s *Service) createUpgrade(v url.Values) (sql.Result, error) {
+func (s *Service) createUpgrade(u Upgrade) (sql.Result, error) {
 	if err := s.DB.Ping(); err != nil {
 		return nil, err
 	}
 
-	var columns, fields []string
-	var values []interface{}
+	row := s.DB.QueryRow("SELECT code FROM tc_up_type WHERE name = ?", u.Type)
+	var id int64
+	err := row.Scan(&id)
 
-	for column := range v {
-		columns = append(columns, column)
-		fields = append(fields, "?")
-		values = append(values, v.Get(column))
+	if err != nil {
+		res, _ := s.DB.Exec("INSERT INTO tc_up_type (name) VALUES (?)", u.Type)
+		id, _ = res.LastInsertId()
 	}
 
-	query := fmt.Sprintf("insert into tc_upgrade (%v) values (%v)", strings.Join(columns, ","), strings.Join(fields, ","))
-
-	return s.DB.Exec(query, values...)
+	values := []interface{}{u.Cost, u.Max, u.Name, u.Text, id, u.ComponentID}
+	return s.DB.Exec("insert into tc_upgrade (cost, max, name, text, type, component_id) values (?,?,?,?,?,?)", values...)
 }
 
 //expand to allow any number of fields
